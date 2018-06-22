@@ -58,6 +58,8 @@ def api_with_structure_in(app, api_doc, endpoint, structure, structure_in):
 
         def jsonify_f():
             try:
+                if 'json_argument' not in flask.request.form:
+                    raise ValueError("The json_argument argument was missing in the request")
                 json_in_as_string = flask.request.form['json_argument']
                 json_in_as_object = json.loads(json_in_as_string)
                 if not structure_in.validate(json_in_as_object):
