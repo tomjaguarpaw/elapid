@@ -52,6 +52,7 @@ def api_main(structure_command_line, maker):
             app = Flask(__name__)
             CORS(app)
             api_doc = {}
+            forms = []
 
             def decorate(endpoint, structure_in, structure_out):
                 def ret(f):
@@ -73,6 +74,7 @@ def api_main(structure_command_line, maker):
 
                     if type(structure_in) == j.Empty:
                         form_ = '\n'.join(form())
+                        forms.append((form_endpoint, endpoint))
                     else:
                         form_ = """
                         <p>I'm afraid I can't currently make a form
@@ -94,7 +96,7 @@ def api_main(structure_command_line, maker):
 
             create_your_app(api)
 
-            _admin.setup_admin2(app, readme_md, revision_diff, api_doc, make_revision_link)
+            _admin.setup_admin2(app, readme_md, revision_diff, api_doc, make_revision_link, forms)
 
             return app
 

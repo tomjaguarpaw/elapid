@@ -75,10 +75,23 @@ def api_with_structure_in(app, api_doc, endpoint, structure, structure_in):
 
     return ret
 
-def setup_admin2(app, readme_md, revision_diff, api_doc, make_revision_link):
+def setup_admin2(app, readme_md, revision_diff, api_doc, make_revision_link, forms):
     add_readme(app, md_, readme_md)
     add_git(app, md_, revision_diff, make_revision_link)
     add_api_doc(app, md_, api_doc)
+    add_forms(app, forms)
+
+def add_forms(app, forms):
+    def lines():
+        yield "<ul>"
+        for (form_endpoint, endpoint) in forms:
+            yield '<li><a href="%s">%s</a> (%s)</li>' % (form_endpoint, form_endpoint, endpoint)
+        yield "</ul>"
+
+    content = '\n'.join(lines())
+
+    @app.route('/forms', methods=['GET'])
+    def _(): return content
 
 def add_api_doc(app, md, api_doc):
     def lines():
@@ -130,4 +143,5 @@ md_ = markdown.Markdown(extensions=[PartialGithubFlavoredMarkdownExtension()])
 admin_links = md_.convert("See\n\n"
                           + "* [API](/API)\n\n"
                           + "* [README](/README)\n\n"
-                          + "* [git](/git)\n")
+                          + "* [git](/git)\n"
+                          + "* [forms](/forms)\n")
