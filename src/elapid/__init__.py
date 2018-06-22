@@ -7,6 +7,7 @@ import sys
 import gunicorn.app.base
 
 import elapid._admin as _admin
+import elapid.jsonstructure as j
 
 # Copied from http://docs.gunicorn.org/en/latest/custom.html
 #
@@ -30,7 +31,7 @@ class StandaloneApplication(gunicorn.app.base.BaseApplication):
     def load(self):
         return self.application()
 
-Decorators = namedtuple('Decorators', 'endpoint')
+Decorators = namedtuple('Decorators', 'endpoint endpoint_with_form')
 
 def api_main(structure_command_line, maker):
     revision_diff = _admin.git_revision_diff()
@@ -58,10 +59,38 @@ def api_main(structure_command_line, maker):
 
                 return ret
 
+            def endpoint_with_form(endpoint, form_endpoint, form_files, structure_in, structure_out):
+                def ret(f):
+                    _admin.api_with_structure_in(app, api_doc, endpoint, structure_out, structure_in)(f)
+
+                    def form():
+                        yield '<form action="' + endpoint + '" method="post" enctype="multipart/form-data">'
+                        for form_file in form_files:
+                            yield '<p><input type="file" name="' + form_file + '"></p>'
+                        yield '<p><input type="hidden" name="json_argument" value="{}"></p>'
+                        yield '<p><input type="submit" value="Run"></p>'
+                        yield '</form>'
+
+                    if type(structure_in) == j.Empty:
+                        form_ = '\n'.join(form())
+                    else:
+                        form_ = """
+                        <p>I'm afraid I can't currently make a form
+                        for the input structure that this endpoint
+                        has.  Perhaps <a
+                        href="https://github.com/tomjaguarpaw/elapid/issues">file
+                        an issue</a>?
+                        """
+
+                    app.add_url_rule(rule=form_endpoint, endpoint=form_endpoint, view_func=lambda: form_, methods=['GET'])
+
+                return ret
+
             @app.route('/', methods=['GET'])
             def _root(): return _admin.admin_links
 
-            api = Decorators(endpoint=decorate)
+            api = Decorators(endpoint=decorate,
+                             endpoint_with_form=endpoint_with_form)
 
             create_your_app(api)
 

@@ -61,9 +61,11 @@ def create_endpoints(command_line_json):
             j.Array(j.AllOf({"x1": j.Number(), "y1": j.Number(),
                              "x2": j.Number(), "y2": j.Number()}))
 
-        @api.endpoint(endpoint='/detect_faces',
-                      structure_in=j.Empty(),
-                      structure_out=detect_faces_output_structure)
+        @api.endpoint_with_form(endpoint='/detect_faces',
+                                form_endpoint='/form_detect_faces',
+                                form_files=['input_file'],
+                                structure_in=j.Empty(),
+                                structure_out=detect_faces_output_structure)
         def _(_json_in, files):
             """Upload the image in a file upload called 'input_file'"""
 
