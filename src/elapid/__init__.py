@@ -54,7 +54,7 @@ def api_main(structure_command_line, maker):
 
             def decorate(endpoint, structure_in, structure_out):
                 def ret(f):
-                    return _admin.api_with_structure_in(app, api_doc, endpoint, structure_out, structure_in)(f)
+                    _admin.api_with_structure_in(app, api_doc, endpoint, structure_out, structure_in)(f)
 
                 return ret
 

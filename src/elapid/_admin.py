@@ -71,7 +71,7 @@ def api_with_structure_in(app, api_doc, endpoint, structure, structure_in):
             else:
                 return jsonify({"error": "json output did not validate " + str(json_as_object)})
 
-        return app.add_url_rule(rule=endpoint, endpoint=endpoint, view_func=jsonify_f, methods=['POST'])
+        app.add_url_rule(rule=endpoint, endpoint=endpoint, view_func=jsonify_f, methods=['POST'])
 
     return ret
 
